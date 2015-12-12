@@ -1,0 +1,8 @@
+.container {
+	max-width: 1000px;
+}
+
+.jumbotron {
+  text-align: center;
+  padding-bottom: 50px;
+}
