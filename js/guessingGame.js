@@ -1,80 +1,108 @@
 var winningNumber = generateWinningNumber();
 var playersGuess;
+var prevGuess = [];
+
+// lessons learned after debugging:
+// 1. My event listeners were wrapped in functions that were never invoked
+// 2. In some of the code, I mixed JS syntax with jQuery (i.e: document.getElementById("#guessNum"))
+// 3. In HTML file, I reference the guessingGame.js file before the jQuery file
 
 //things to do:
-// animation and style changes when the player wins...
+// animation and style changes when the player wins/miss/lose
 // enter = playerSubmission
-// out of range event
 // array with previous guess
+// limit the amount of hints
+// not accounting for duplicates
+// not accounting for out of range
+// total guess left not decrementing
 
-// Generate the Winning Number
 function generateWinningNumber(){
 	return Math.floor(Math.random()*100);
 }
 
-// Fetch the Players Guess
 function playersGuessSubmission() {
-	$(document).ready(function() {
-		$('#guess').on('click', function () {
-			playerGuess = +document.getElementById("#guessNum");
-			document.getElementById("#guessNum").value = "";
-		});
-	});
+
+	playersGuess = +$("#guessNum").val();
+	document.getElementById("guessNum").value = "";
+	checkGuess(playersGuess);
+	prevGuess.push(playersGuess);
+	guessCounter();
+
 };
 
-//old code
-	// if (testArr.indexOf(playersGuess)>-1){
-	// 	$('#status').text("You can't guess the same number");
-	// } else if(playersGuess > 100 || playersGuess < 0) {
-	// 	$('#status').text("Your guess is out of range");
-	// } else {
-	// 	testArr.push(playersGuess);
-	// }
-
-	// if (winningNumber === playersGuess) {
-	// 	$('#status').text("Winner, Winner, Chicken Dinner!");
-	// } else{
-	// 	$('#status').text("Try again");
-	// }
-//check results
-function checkGuess(guess){
-	if (playerGuess === winningNumber) {
-		$("#status").text("Winner!");
+function checkGuess(){
+	
+	if (prevGuess.indexOf(playersGuess) > -1) {
+		$("#status").text("No duplicates allowed!")
+	} else if (playersGuess < 0 || playersGuess > 100) {
+		$("#status").text("Please guess a number between 0-100")
 	} else {
-		$("#status").text("Loser!");
+		prevGuess.push(playersGuess);
+		if (winningNumber === playersGuess) {
+			$("#status").text("Winner!");
+			$('#status').animate({fontSize: '3em'}, 2500)
+		} else {
+			$("#status").html("Wrong!" + "<p>" + guessMessage() + "!" + "</p>");
+		}
 	}
+};
 
-// out of range
+// function guessCounter() {
+// 	var totalGuess = 5;
 
-// duplicate
+// 	if (playersGuessSubmission) {
+// 		totalGuess--
+// 		$('#status2').text("You have " + totalGuess + " guesses remaining")
+// 	} else if (prevGuess.length>=5) {
+// 		prevGuess = [];
+// 		totalGuess = 5;
+// 		playAgain();
+// 	}
+// }
 
-}
+// function guessCounter() {
+// 	var totalGuess = 5;
+// 	var decrementer = function () {
+// 		var arr = Array.prototype.slice.call(arguments)[0];
+// 		if (!arr && totalGuess>1) {
+// 			totalGuess--;
+// 			$('#status3').text("You have " + totalGuess + "guesses remaining!");
+// 		} else {
+// 			if (!arr) {
+// 				$('#status2').text("Game Over");
+// 				gameOver();
+// 			}
+// 			totalGuess = 5;
+// 		}
+// 	}
+// 	return decrementer;
+// }
 
-
-// next few functions will assist user
-// how will this interact with the DOM?
-function lowerOrHigher(guess){
+function lowerOrHigher(){
 	var str = ""
-	var diff = playersGuess - winningNumber
-	if (diff > 0) {
+	
+	if (playersGuess > winningNumber) {
 		str += "The winning number is lower";
-	} else if (diff < 0) {
-		str += "The winning number is higher"
+	} else if (playersGuess < winningNumber) {
+		str += "The winning number is higher";
 	}
-	return str + guessMessage();
-	$('#status').text("str + guessMessage()")
+	return str;
 };
 
 function guessMessage() {
 	var diff = Math.abs(playersGuess - winningNumber);
+	var msg = "";
 
-	if (diff > 0 && diff <= 5) {
-		return " and within 5 digits away";
-	} else if (diff > 5 && diff <= 10) {
-		return " and within 10 digits away";
-	} else if(diff > 10 && diff <= 20) {
-		return " and within 20 digits away";
+	if (diff<=5) {
+		msg += " and within 5 digits";
+	} else if (diff<=10) {
+		msg += " and within 10 digits";
+	} else if (diff<=20) {
+		msg += " and within 20 digits";
+	} else if (diff>20) {
+		msg += " and you are very far away"
 	}
+	return lowerOrHigher() + msg;
 }
 
 function provideHint(){
@@ -84,48 +112,25 @@ function provideHint(){
 	hint.push(generateWinningNumber());
 	var list = hint.sort().join(",");
 
-	$(document).ready(function(){
-		$('#hint').on('click', function() {
-			// could I use .text instead?
-			$('#status').html("The winning number is one of these " + list);
-		});
-	});
+	$('#status').html("The winning number is one of these " + list);
 }
 
 function playAgain(){
-	$(document).ready(function() {
-		$('#reset').on('click', function () {
-			winningNumber = generateWinningNumber();
-			console.log(winningNumber);
-			$('#status').text("");
-			$('#guessNum').val("")
-			provideHint();
+	winningNumber = generateWinningNumber();
+	console.log(winningNumber);
+	$('#status').text("You have 5 guesses remaining");
+	$('#guessNum').val("")
 
-			$('#reset').prop('disabled', false);
-			$('#guess').prop('disabled', false);
-			$('#hint').prop('disabled', false);
-		});
-	})
+	$('#reset').prop('disabled', false);
+	$('#guess').prop('disabled', false);
+	$('#hint').prop('disabled', false);
 };
 
-
-// function guessCount() {
-// 	var counter = 5;
-// 	var lowerCount = function() {
-// 		var foo = Array.prototype.slice.call(arguments)[0];
-// 		if ((counter>1) && (!foo)) {
-// 			counter--;
-// 			$('#status').append("Total of " + counter " remaining");
-// 		} else {
-// 			if(!foo) {
-// 				$('#status').text("Good Game, Try again?");
-// 			}
-// 		}
-// 	}
-// 	return lowerCount
-// }
-
-
+$(document).ready(function() {
+	$('#guess').on('click', playersGuessSubmission )
+	$('#reset').on('click', playAgain )
+	$('#hint').on('click', provideHint )
+});
 
 
 
