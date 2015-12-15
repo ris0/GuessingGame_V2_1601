@@ -1,6 +1,11 @@
-var playerGuess;
 var winningNumber = generateWinningNumber();
-var testArr = [];
+var playersGuess;
+
+//things to do:
+// animation and style changes when the player wins...
+// enter = playerSubmission
+// out of range event
+// array with previous guess
 
 // Generate the Winning Number
 function generateWinningNumber(){
@@ -8,110 +13,125 @@ function generateWinningNumber(){
 }
 
 // Fetch the Players Guess
-function playersGuessSubmission(){
-	var totalGuess = guessCount();
-	var submit = function (){
-		playersGuess = parseInt(document.getElementById("guessNum").value);
-		console.log(playersGuess);
-		$('#guessNum').val("");
-	};
-
-	$(document).ready(function(){
-		$('#submit').click(function() {
-			submit();
-		});
-
-		$(document).keypress(function(x) {
-			if(x.which==3) {
-				submit();
-			}
+function playersGuessSubmission() {
+	$(document).ready(function() {
+		$('#guess').on('click', function () {
+			playerGuess = +document.getElementById("#guessNum");
+			document.getElementById("#guessNum").value = "";
 		});
 	});
-}
-
-//check results
-function checkGuess(guess){
-	if (testArr.indexOf(playersGuess)>-1){
-		$('#status').text("You can't guess the same number");
-	} else if(playersGuess > 100 || playersGuess < 0) {
-		$('#status').text("Your guess is out of range");
-	} else {
-		testArr.push(playersGuess);
-	}
-
-	if (winningNumber === playersGuess) {
-		$('#status').text("Winner, Winner, Chicken Dinner!");
-	} else{
-		$('#status').text("Try again");
-	}
-}
-
-// next few functions will assist user
-function lowerOrHigher(guess){
-	var diff = playersGuess - winningNumber
-	if (diff > 0) {
-		return "lower";
-	} else if (diff < 0) {
-		return "higher"
-	}
 };
 
-function guessCount() {
-	var counter = 5;
-	var lowerCount = function() {
-		var foo = Array.prototype.slice.call(arguments)[0];
-		if (counter>1 && !foo) {
-			counter--;
-			$('#status').append("Total of " + counter " remaining");
-		} else {
-			if(!foo) {
-				$('#status').text("Good Game, Try again?");
-			}
-		}
+//old code
+	// if (testArr.indexOf(playersGuess)>-1){
+	// 	$('#status').text("You can't guess the same number");
+	// } else if(playersGuess > 100 || playersGuess < 0) {
+	// 	$('#status').text("Your guess is out of range");
+	// } else {
+	// 	testArr.push(playersGuess);
+	// }
+
+	// if (winningNumber === playersGuess) {
+	// 	$('#status').text("Winner, Winner, Chicken Dinner!");
+	// } else{
+	// 	$('#status').text("Try again");
+	// }
+//check results
+function checkGuess(guess){
+	if (playerGuess === winningNumber) {
+		$("#status").text("Winner!");
+	} else {
+		$("#status").text("Loser!");
 	}
-	return lowerCount
+
+// out of range
+
+// duplicate
+
 }
+
+
+// next few functions will assist user
+// how will this interact with the DOM?
+function lowerOrHigher(guess){
+	var str = ""
+	var diff = playersGuess - winningNumber
+	if (diff > 0) {
+		str += "The winning number is lower";
+	} else if (diff < 0) {
+		str += "The winning number is higher"
+	}
+	return str + guessMessage();
+	$('#status').text("str + guessMessage()")
+};
 
 function guessMessage() {
 	var diff = Math.abs(playersGuess - winningNumber);
 
-	if (diff <= 5) {
-		diff = 5;
-	} else if (diff <=10) {
-		diff = 10;
-	} else if(dif<=20) {
-		diff = 20;
-	} else {
-		return "Guess is" + lowerOrHigher();
+	if (diff > 0 && diff <= 5) {
+		return " and within 5 digits away";
+	} else if (diff > 5 && diff <= 10) {
+		return " and within 10 digits away";
+	} else if(diff > 10 && diff <= 20) {
+		return " and within 20 digits away";
 	}
-	return "Guess is" + lowerOrHigher() + "than the magic number and" + diff + " digits away";
 }
 
 function provideHint(){
 	var hint = [];
-	hint.push(winningNumber))
+	hint.push(winningNumber)
 	hint.push(generateWinningNumber());
-	hint.push(generateWinningNumber();
-	var list = hint.sort();
+	hint.push(generateWinningNumber());
+	var list = hint.sort().join(",");
 
 	$(document).ready(function(){
-		$('#hint').click(function() {
-			$('#status').html("One of these numbers is magical" + hint.join(","));
+		$('#hint').on('click', function() {
+			// could I use .text instead?
+			$('#status').html("The winning number is one of these " + list);
 		});
 	});
 }
 
 function playAgain(){
-	winningNumber = generateWinningNumber();
-	console.log(winningNumber);
-	testArr = [];
-	$('#status').text("");
-	$('#guessNum').val("")
-	provideHint();
+	$(document).ready(function() {
+		$('#reset').on('click', function () {
+			winningNumber = generateWinningNumber();
+			console.log(winningNumber);
+			$('#status').text("");
+			$('#guessNum').val("")
+			provideHint();
 
-	$('#guessNum').prop('disabled', false);
-	$('#guess').prop('disabled', false);
-	$('#hint').prop('disabled', false);
-}
+			$('#reset').prop('disabled', false);
+			$('#guess').prop('disabled', false);
+			$('#hint').prop('disabled', false);
+		});
+	})
+};
+
+
+// function guessCount() {
+// 	var counter = 5;
+// 	var lowerCount = function() {
+// 		var foo = Array.prototype.slice.call(arguments)[0];
+// 		if ((counter>1) && (!foo)) {
+// 			counter--;
+// 			$('#status').append("Total of " + counter " remaining");
+// 		} else {
+// 			if(!foo) {
+// 				$('#status').text("Good Game, Try again?");
+// 			}
+// 		}
+// 	}
+// 	return lowerCount
+// }
+
+
+
+
+
+
+
+
+
 
 
