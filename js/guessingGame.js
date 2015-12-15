@@ -1,33 +1,25 @@
-var winningNumber = generateWinningNumber();
-var playersGuess;
-var prevGuess = [];
-
-// lessons learned after debugging:
+// Major issues with GG_V1:
 // 1. My event listeners were wrapped in functions that were never invoked
 // 2. In some of the code, I mixed JS syntax with jQuery (i.e: document.getElementById("#guessNum"))
 // 3. In HTML file, I reference the guessingGame.js file before the jQuery file
 
-//things to do:
-// animation and style changes when the player wins/miss/lose
+//Things to do:
+// More animations and styles
 // enter = playerSubmission
-// array with previous guess
-// limit the amount of hints
-// not accounting for duplicates
-// not accounting for out of range
-// total guess left not decrementing
+// GameOver() should reset the game back to normal - Style changes remain after the game is over right now...
+
+var winningNumber = generateWinningNumber();
+var playersGuess;
+var prevGuess = [];
 
 function generateWinningNumber(){
 	return Math.floor(Math.random()*100);
 }
 
 function playersGuessSubmission() {
-
 	playersGuess = +$("#guessNum").val();
 	document.getElementById("guessNum").value = "";
 	checkGuess(playersGuess);
-	prevGuess.push(playersGuess);
-	guessCounter();
-
 };
 
 function checkGuess(){
@@ -38,6 +30,7 @@ function checkGuess(){
 		$("#status").text("Please guess a number between 0-100")
 	} else {
 		prevGuess.push(playersGuess);
+		guessCounter();
 		if (winningNumber === playersGuess) {
 			$("#status").text("Winner!");
 			$('#status').animate({fontSize: '3em'}, 2500)
@@ -47,36 +40,13 @@ function checkGuess(){
 	}
 };
 
-// function guessCounter() {
-// 	var totalGuess = 5;
-
-// 	if (playersGuessSubmission) {
-// 		totalGuess--
-// 		$('#status2').text("You have " + totalGuess + " guesses remaining")
-// 	} else if (prevGuess.length>=5) {
-// 		prevGuess = [];
-// 		totalGuess = 5;
-// 		playAgain();
-// 	}
-// }
-
-// function guessCounter() {
-// 	var totalGuess = 5;
-// 	var decrementer = function () {
-// 		var arr = Array.prototype.slice.call(arguments)[0];
-// 		if (!arr && totalGuess>1) {
-// 			totalGuess--;
-// 			$('#status3').text("You have " + totalGuess + "guesses remaining!");
-// 		} else {
-// 			if (!arr) {
-// 				$('#status2').text("Game Over");
-// 				gameOver();
-// 			}
-// 			totalGuess = 5;
-// 		}
-// 	}
-// 	return decrementer;
-// }
+function guessCounter () {
+	if (prevGuess.length >= 5) {
+		playAgain();
+	} else {
+		$('#status2').text("You have " + (5-prevGuess.length) + " remaining!");
+	}
+}
 
 function lowerOrHigher(){
 	var str = ""
@@ -120,6 +90,7 @@ function playAgain(){
 	console.log(winningNumber);
 	$('#status').text("You have 5 guesses remaining");
 	$('#guessNum').val("")
+	prevGuess = [];
 
 	$('#reset').prop('disabled', false);
 	$('#guess').prop('disabled', false);
